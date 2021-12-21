@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "vercel-build": "yum install fontconfig && cp /lib64/{libfontconfig.so.1,libfreetype.so.6,libexpat.so.1,libuuid.so.1,libbz2.so.1,libpng15.so.15} node_modules/skia-canvas/lib/v6/ && npm run build",
+    "vercel-build": "yum install libuuid-devel libmount-devel && cp /lib64/{libuuid,libmount,libblkid}.so.1 node_modules/canvas/build/Release/ && npm run build",
     "start": "next start",
     "lint": "next lint"
   },
