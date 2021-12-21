@@ -1,7 +1,7 @@
-import type { CanvasRenderingContext2D } from 'skia-canvas';
+import type { NodeCanvasRenderingContext2D } from 'canvas';
 
 export interface TextProps {
-  ctx: CanvasRenderingContext2D;
+  ctx: NodeCanvasRenderingContext2D;
   text: string;
   font: string;
   x: number;

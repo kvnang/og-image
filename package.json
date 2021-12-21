@@ -11,19 +11,18 @@
   "dependencies": {
     "@fontsource/poppins": "^4.5.0",
     "@fontsource/ubuntu-mono": "^4.5.0",
+    "canvas": "^2.8.0",
     "just-debounce-it": "^3.0.1",
     "next": "12.0.7",
     "normalize.css": "^8.0.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "skia-canvas": "^0.9.27",
     "styled-components": "^5.3.3"
   },
   "devDependencies": {
     "@types/node": "16.11.12",
     "@types/react": "17.0.37",
     "@types/sharp": "^0.29.4",
-    "@types/skia-canvas": "^0.9.2",
     "@types/styled-components": "^5.1.18",
     "eslint": "8.4.1",
     "eslint-config-airbnb": "^19.0.0",

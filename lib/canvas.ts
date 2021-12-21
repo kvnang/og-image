@@ -1,20 +1,18 @@
 import {
-  FontLibrary,
+  registerFont,
+  createCanvas,
   loadImage,
+  NodeCanvasRenderingContext2D,
   Canvas,
-  CanvasRenderingContext2D,
-} from 'skia-canvas';
+} from 'canvas';
 import path from 'path';
 import cover from '../utils/cover';
-import { cleanObject, getBaseUrl } from '../utils/helpers';
+import { cleanObject } from '../utils/helpers';
 import wrapText, { TextProps } from '../utils/wrapText';
 
 interface DrawTextProps extends TextProps {
   type?: string;
 }
-
-const isBrowser = typeof window !== 'undefined';
-const baseUrl = getBaseUrl();
 
 let passedConfig = {};
 
@@ -29,11 +27,13 @@ function setConfig(conf?: {}) {
 export function getConfig() {
   const defaultLogo =
     'https://github.githubassets.com/favicons/favicon-dark.png';
-  const defaultBackground = `${baseUrl}/sample-background.jpg`;
+  const defaultBackground =
+    'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?ixlib=rb-1.2.1&ixid=MnwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2338&q=80';
 
   const config = {
     imageWidth: 1200,
     imageHeight: 630,
+    imageScale: 2,
     paddingTop: 80,
     paddingLeft: 80,
     fontSize: 64,
@@ -53,22 +53,29 @@ export function getConfig() {
   return { ...config, ...passedConfig };
 }
 
+interface FontFaceProps {
+  family: string;
+  weight?: string;
+  style?: string;
+}
+
+async function loadFontServer(font: string, fontFace: FontFaceProps) {
+  registerFont(path.resolve(`./fonts/${font}`), fontFace);
+}
+
 async function loadFonts() {
-  const font400 = 'poppins-latin-400-normal.ttf';
+  const font400 = 'poppins-latin-300-normal.ttf';
   const font600 = 'poppins-latin-600-normal.ttf';
 
-  if (!isBrowser) {
-    if (FontLibrary.has('Poppins')) {
-      return;
-    }
-
-    const basePath =
-      process.env.NODE_ENV === 'production' ? path.resolve('fonts') : './fonts';
-
-    FontLibrary.use([
-      `${basePath}/poppins-latin-400-normal.ttf`,
-      `${basePath}/poppins-latin-600-normal.ttf`,
-    ]);
+  if (typeof window === 'undefined') {
+    await loadFontServer(font400, {
+      family: 'Poppins',
+      weight: '300',
+    });
+    await loadFontServer(font600, {
+      family: 'Poppins',
+      weight: '600',
+    });
   } else {
     await Promise.allSettled([
       await loadFont('Poppins', `/api/font/${font400}`, { weight: '400' }),
@@ -91,12 +98,12 @@ function drawText({
   type,
 }: DrawTextProps) {
   ctx.save();
-
-  ctx.fillStyle = '#fff';
   ctx.font = font;
+  ctx.textBaseline = 'top';
+
+  ctx.fillStyle = '#ffffff';
 
   let height = 0; // For measuring text height
-  const yAlphabetic = y + lineHeight * 0.7; // bug with textBaseLine = top causing error. So, reverting to default "alphabetic"
 
   if (type === 'title') {
     const { lineCount } = wrapText({
@@ -104,64 +111,48 @@ function drawText({
       text,
       font,
       x,
-      y: yAlphabetic,
+      y,
       maxWidth,
       maxHeight,
       lineHeight,
     });
     height = lineHeight * lineCount;
   } else {
-    ctx.fillText(text, x, yAlphabetic);
+    ctx.fillText(text, x, y);
   }
+
   ctx.restore();
 
   return { width: maxWidth, height: height || lineHeight };
 }
 
-async function loadImageBrowser(src: string) {
-  return new Promise<HTMLImageElement>((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = src;
-    img.crossOrigin = 'anonymous';
-  });
-}
-
-async function loadImageByEnv(src: string) {
-  if (isBrowser) {
-    return loadImageBrowser(src);
-  }
-  return loadImage(src);
-}
-
 async function loadImageWithFallback(imageUrl: string, fallbackUrl: string) {
   let img;
   try {
-    img = await loadImageByEnv(imageUrl);
+    img = await loadImage(imageUrl, { crossOrigin: 'anonymous' });
   } catch (err) {
     console.error(err);
-    img = await loadImageByEnv(fallbackUrl);
+    img = await loadImage(fallbackUrl, { crossOrigin: 'anonymous' });
   }
   return img;
 }
 
-async function drawBackgroundImage(ctx: CanvasRenderingContext2D) {
+async function drawBackgroundImage(ctx: NodeCanvasRenderingContext2D) {
   const { imageWidth, imageHeight, background, defaultBackground } =
     getConfig();
 
   const bgImg = await loadImageWithFallback(background, defaultBackground);
 
-  ctx.save();
   cover(bgImg, 0, 0, imageWidth, imageHeight).render(ctx);
+  // ctx.drawImage(bgImg, 0, 0, imageWidth, imageHeight);
 
   // Dark overlay
   ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
   ctx.fillRect(0, 0, imageWidth, imageHeight);
-  ctx.restore();
+  // ctx.globalCompositeOperation = "destination-over"; // Ensure that all subsequent draw operations occur on a layer above the background
 }
 
-function drawTitleText(ctx: CanvasRenderingContext2D) {
+function drawTitleText(ctx: NodeCanvasRenderingContext2D) {
   const {
     imageWidth,
     paddingTop,
@@ -178,7 +169,7 @@ function drawTitleText(ctx: CanvasRenderingContext2D) {
   const { height } = drawText({
     ctx,
     text: title,
-    font: `600 ${fontSize}px/${lineHeight}px Poppins`,
+    font: `600 ${fontSize}px Poppins`,
     x: paddingLeft,
     y: paddingTop,
     maxWidth,
@@ -190,7 +181,7 @@ function drawTitleText(ctx: CanvasRenderingContext2D) {
   drawText({
     ctx,
     text: meta,
-    font: `400 ${fontSizeSmall}px/${fontSizeSmall * 1.5}px Poppins`,
+    font: `300 ${fontSizeSmall}px Poppins`,
     x: paddingLeft,
     y: paddingTop + height + 24,
     maxWidth,
@@ -199,7 +190,7 @@ function drawTitleText(ctx: CanvasRenderingContext2D) {
   });
 }
 
-async function drawProfileImageAndText(ctx: CanvasRenderingContext2D) {
+async function drawProfileImageAndText(ctx: NodeCanvasRenderingContext2D) {
   const {
     imageHeight,
     paddingTop,
@@ -210,8 +201,9 @@ async function drawProfileImageAndText(ctx: CanvasRenderingContext2D) {
 
   const profileImgX = paddingLeft;
   const profileImgY = imageHeight - paddingTop - profileImgSize;
-  const profileImg = await loadImageByEnv(
-    'https://secure.gravatar.com/avatar/fcbbe6a602b2ed048931956421f1f7f3'
+  const profileImg = await loadImage(
+    'https://secure.gravatar.com/avatar/fcbbe6a602b2ed048931956421f1f7f3',
+    { crossOrigin: 'anonymous' }
   );
   ctx.save();
   ctx.beginPath();
@@ -251,7 +243,7 @@ async function drawProfileImageAndText(ctx: CanvasRenderingContext2D) {
   });
 }
 
-async function drawLogo(ctx: CanvasRenderingContext2D) {
+async function drawLogo(ctx: NodeCanvasRenderingContext2D) {
   const {
     imageWidth,
     imageHeight,
@@ -265,6 +257,9 @@ async function drawLogo(ctx: CanvasRenderingContext2D) {
 
   const logoX = imageWidth - paddingLeft - logoWidth;
   const logoY = imageHeight - paddingTop - logoHeight;
+  // const logo = await loadImage(
+  // , {crossOrigin: 'anonymous'}   "https://secure.gravatar.com/avatar/fcbbe6a602b2ed048931956421f1f7f3"
+  // );
   const logoImg = await loadImageWithFallback(logo, defaultLogo);
 
   ctx.drawImage(logoImg, logoX, logoY, logoWidth, logoHeight);
@@ -286,24 +281,25 @@ export async function buildCanvas(
   _canvas?: Canvas | HTMLCanvasElement
 ) {
   setConfig(config);
-  const { imageWidth, imageHeight } = getConfig();
+  const { imageWidth, imageHeight, imageScale } = getConfig();
 
-  const canvas = (_canvas as Canvas) || new Canvas(imageWidth, imageHeight);
+  await loadFonts();
+
+  const canvas =
+    (_canvas as Canvas) ||
+    createCanvas(imageWidth * imageScale, imageHeight * imageScale);
   const ctx = canvas.getContext('2d');
 
   if (!ctx) {
     return;
   }
 
-  await loadFonts();
-
-  ctx.fillStyle = '#e9ecef';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.scale(imageScale, imageScale);
 
   await Promise.allSettled([
     await drawBackgroundImage(ctx),
-    await drawProfileImageAndText(ctx),
     drawTitleText(ctx),
+    await drawProfileImageAndText(ctx),
     await drawLogo(ctx),
   ]);
 

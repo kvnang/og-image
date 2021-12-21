@@ -1,4 +1,4 @@
-import type { CanvasRenderingContext2D, Image } from 'skia-canvas';
+import type { NodeCanvasRenderingContext2D, Image } from 'canvas';
 
 class Cover {
   img: Image;
@@ -102,7 +102,7 @@ class Cover {
    * @param {CanvasRenderingContext2D} ctx canvas context to render to
    * @returns {Cover}
    */
-  render(ctx: CanvasRenderingContext2D) {
+  render(ctx: NodeCanvasRenderingContext2D) {
     ctx.drawImage(
       this.img,
       this.sx,
