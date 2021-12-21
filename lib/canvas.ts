@@ -34,7 +34,7 @@ export function getConfig() {
   const config = {
     imageWidth: 1200,
     imageHeight: 630,
-    imageScale: 2,
+    imageScale: 1,
     paddingTop: 80,
     paddingLeft: 80,
     fontSize: 64,
