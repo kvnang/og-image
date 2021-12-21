@@ -7,12 +7,14 @@ import {
 } from 'canvas';
 import path from 'path';
 import cover from '../utils/cover';
-import { cleanObject } from '../utils/helpers';
+import { cleanObject, getBaseUrl } from '../utils/helpers';
 import wrapText, { TextProps } from '../utils/wrapText';
 
 interface DrawTextProps extends TextProps {
   type?: string;
 }
+
+const baseUrl = getBaseUrl();
 
 let passedConfig = {};
 
@@ -27,8 +29,7 @@ function setConfig(conf?: {}) {
 export function getConfig() {
   const defaultLogo =
     'https://github.githubassets.com/favicons/favicon-dark.png';
-  const defaultBackground =
-    'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?ixlib=rb-1.2.1&ixid=MnwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2338&q=80';
+  const defaultBackground = `${baseUrl}/sample-background.jpg`;
 
   const config = {
     imageWidth: 1200,
