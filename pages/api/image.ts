@@ -13,8 +13,7 @@ export default async function handler(
     return;
   }
 
-  // @ts-expect-error
-  const image = await canvas.toBuffer('jpg', { density: 1, quality: 0.75 });
+  const image = canvas.toBuffer('image/jpeg', { quality: 0.75 });
 
   res.setHeader('Content-Type', 'image/jpeg');
   res.status(200).send(image);
