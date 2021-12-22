@@ -39,7 +39,7 @@ const ContainerStyles = styled.section`
   }
 
   .inputs {
-    .label {
+    .form-field__label {
       width: 9ch;
     }
   }
@@ -94,17 +94,30 @@ const ContainerStyles = styled.section`
 
 const baseUrl = getBaseUrl();
 
+const defaultValues = {
+  logo: `${baseUrl}/sample-logo.png`,
+  background: `${baseUrl}/sample-background.jpg`,
+  title:
+    'This is a dynamically created image in a canvas element. Lorem ipsum dolor sit amet consectetur adipiscing elit et lorem ipsum dolorem.',
+  meta: '22 January 2022',
+  color: '#ffffff',
+};
+
 export default function Canvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const inputTitleRef = useRef<HTMLInputElement>(null);
   const inputMetaRef = useRef<HTMLInputElement>(null);
   const inputBackgroundRef = useRef<HTMLInputElement>(null);
   const inputLogoRef = useRef<HTMLInputElement>(null);
+  const inputColorRef = useRef<HTMLInputElement>(null);
 
-  const [title, setTitle] = useState<string | undefined>(undefined);
-  const [meta, setMeta] = useState<string | undefined>(undefined);
-  const [background, setBackground] = useState<string | undefined>(undefined);
-  const [logo, setLogo] = useState<string | undefined>(undefined);
+  const [title, setTitle] = useState<string | undefined>(defaultValues.title);
+  const [meta, setMeta] = useState<string | undefined>(defaultValues.meta);
+  const [color, setColor] = useState<string | undefined>(defaultValues.color);
+  const [background, setBackground] = useState<string | undefined>(
+    defaultValues.background
+  );
+  const [logo, setLogo] = useState<string | undefined>(defaultValues.logo);
 
   const [loading, setLoading] = useState<boolean>(false);
   const [canvasOverlay, setCanvasOverlay] = useState<string | undefined>(
@@ -152,13 +165,16 @@ export default function Canvas() {
     }
 
     setLoading(true);
-    maybeUpdateCanvas({ title, meta, background, logo });
-  }, [title, meta, background, logo]);
+    maybeUpdateCanvas({ title, meta, background, logo, color });
+  }, [title, meta, background, logo, color]);
 
   const getLinkParams = () => {
     const params = {
       title,
       meta,
+      background,
+      logo,
+      color,
     };
 
     // remove null, undefined, empty string values
@@ -170,8 +186,6 @@ export default function Canvas() {
   };
 
   const getLink = () => `${baseUrl}/api/image${getLinkParams()}`;
-
-  // const handleSubmit = (e) => {};
 
   return (
     <ContainerStyles className="container">
@@ -191,56 +205,87 @@ export default function Canvas() {
               <div className="form-fields__inner">
                 <div className="form-field">
                   <label htmlFor="title">
-                    <span className="label">Title</span>
-                    <input
-                      type="text"
-                      id="title"
-                      name="title"
-                      placeholder="My news article ..."
-                      ref={inputTitleRef}
-                      onChange={() => setTitle(inputTitleRef.current?.value)}
-                    />
+                    <span className="form-field__label">Title</span>
+                    <div className="form-field__input">
+                      <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        placeholder="My news article ..."
+                        ref={inputTitleRef}
+                        onChange={() => setTitle(inputTitleRef.current?.value)}
+                        defaultValue={defaultValues.title}
+                      />
+                    </div>
                   </label>
                 </div>
                 <div className="form-field">
-                  <label htmlFor="title">
-                    <span className="label">Meta</span>
-                    <input
-                      type="text"
-                      id="meta"
-                      name="meta"
-                      placeholder="1 January 1990"
-                      ref={inputMetaRef}
-                      onChange={() => setMeta(inputMetaRef.current?.value)}
-                    />
+                  <label htmlFor="meta">
+                    <span className="form-field__label">Meta</span>
+                    <div className="form-field__input">
+                      <input
+                        type="text"
+                        id="meta"
+                        name="meta"
+                        placeholder="1 January 1990"
+                        ref={inputMetaRef}
+                        onChange={() => setMeta(inputMetaRef.current?.value)}
+                        defaultValue={defaultValues.meta}
+                      />
+                    </div>
                   </label>
                 </div>
                 <div className="form-field">
-                  <label htmlFor="title">
-                    <span className="label">Background</span>
-                    <input
-                      type="url"
-                      id="background"
-                      name="background"
-                      placeholder="https://www.example.com/image.jpg"
-                      ref={inputBackgroundRef}
-                      onChange={() =>
-                        setBackground(inputBackgroundRef.current?.value)
-                      }
-                    />
+                  <label htmlFor="color">
+                    <span className="form-field__label">Color</span>
+                    <div className="form-field__input">
+                      <input
+                        type="text"
+                        id="color"
+                        name="color"
+                        placeholder="#ffffff"
+                        ref={inputColorRef}
+                        onChange={() => setColor(inputColorRef.current?.value)}
+                        defaultValue={defaultValues.color}
+                      />
+                    </div>
                   </label>
                 </div>
                 <div className="form-field">
-                  <label htmlFor="title">
-                    <span className="label">Logo</span>
-                    <input
-                      type="url"
-                      id="logo"
-                      name="logo"
-                      placeholder="https://www.example.com/image.jpg"
-                      ref={inputLogoRef}
-                      onChange={() => setLogo(inputLogoRef.current?.value)}
-                    />
+                  <label htmlFor="background">
+                    <span className="form-field__label">Background</span>
+                    <div className="form-field__input">
+                      <input
+                        type="url"
+                        id="background"
+                        name="background"
+                        placeholder="https://www.example.com/image.jpg"
+                        ref={inputBackgroundRef}
+                        onChange={() =>
+                          setBackground(inputBackgroundRef.current?.value)
+                        }
+                        defaultValue={defaultValues.background}
+                      />
+                      <p className="form-field__desc">
+                        Accepts URL or Hex color
+                      </p>
+                    </div>
+                  </label>
+                </div>
+                <div className="form-field">
+                  <label htmlFor="logo">
+                    <span className="form-field__label">Logo</span>
+                    <div className="form-field__input">
+                      <input
+                        type="url"
+                        id="logo"
+                        name="logo"
+                        placeholder="https://www.example.com/image.jpg"
+                        ref={inputLogoRef}
+                        onChange={() => setLogo(inputLogoRef.current?.value)}
+                        defaultValue={defaultValues.logo}
+                      />
+                    </div>
                   </label>
                 </div>
               </div>

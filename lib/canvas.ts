@@ -6,7 +6,7 @@ import {
 } from 'skia-canvas';
 import path from 'path';
 import cover from '../utils/cover';
-import { cleanObject, getBaseUrl } from '../utils/helpers';
+import { cleanObject, isValidHexColor, isValidUrl } from '../utils/helpers';
 import wrapText, { TextProps } from '../utils/wrapText';
 
 interface DrawTextProps extends TextProps {
@@ -14,7 +14,6 @@ interface DrawTextProps extends TextProps {
 }
 
 const isBrowser = typeof window !== 'undefined';
-const baseUrl = getBaseUrl();
 
 let passedConfig = {};
 
@@ -27,10 +26,6 @@ function setConfig(conf?: {}) {
 }
 
 export function getConfig() {
-  const defaultLogo =
-    'https://github.githubassets.com/favicons/favicon-dark.png';
-  const defaultBackground = `${baseUrl}/sample-background.jpg`;
-
   const config = {
     imageWidth: 1200,
     imageHeight: 630,
@@ -44,10 +39,9 @@ export function getConfig() {
     title:
       'This is a dynamically created image in a canvas element. Lorem ipsum dolor sit amet consectetur adipiscing elit et lorem ipsum dolorem.',
     meta: '29 January 2022',
-    defaultBackground,
-    background: defaultBackground,
-    defaultLogo,
-    logo: defaultLogo,
+    background: '',
+    logo: '',
+    color: '#fff',
   };
 
   return { ...config, ...passedConfig };
@@ -92,7 +86,7 @@ function drawText({
 }: DrawTextProps) {
   ctx.save();
 
-  ctx.fillStyle = '#fff';
+  ctx.fillStyle = getConfig().color;
   ctx.font = font;
 
   let height = 0; // For measuring text height
@@ -129,10 +123,19 @@ async function loadImageBrowser(src: string) {
 }
 
 async function loadImageByEnv(src: string) {
-  if (isBrowser) {
-    return loadImageBrowser(src);
+  let img;
+
+  try {
+    if (isBrowser) {
+      img = await loadImageBrowser(src);
+    } else {
+      img = await loadImage(src);
+    }
+  } catch (err) {
+    console.error(err);
   }
-  return loadImage(src);
+
+  return img;
 }
 
 async function loadImageWithFallback(imageUrl: string, fallbackUrl: string) {
@@ -146,19 +149,44 @@ async function loadImageWithFallback(imageUrl: string, fallbackUrl: string) {
   return img;
 }
 
-async function drawBackgroundImage(ctx: CanvasRenderingContext2D) {
-  const { imageWidth, imageHeight, background, defaultBackground } =
-    getConfig();
+async function drawBackground(ctx: CanvasRenderingContext2D) {
+  const { imageWidth, imageHeight, background } = getConfig();
 
-  const bgImg = await loadImageWithFallback(background, defaultBackground);
+  function drawWhiteBackground() {
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, imageWidth, imageHeight);
+  }
 
-  ctx.save();
-  cover(bgImg, 0, 0, imageWidth, imageHeight).render(ctx);
+  if (!background) {
+    drawWhiteBackground();
+    return;
+  }
 
-  // Dark overlay
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-  ctx.fillRect(0, 0, imageWidth, imageHeight);
-  ctx.restore();
+  if (isValidUrl(background)) {
+    const img = await loadImageByEnv(background);
+
+    if (img) {
+      ctx.save();
+
+      // Load Image
+      cover(img, 0, 0, imageWidth, imageHeight).render(ctx);
+
+      // Dark overlay
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+      ctx.fillRect(0, 0, imageWidth, imageHeight);
+      ctx.restore();
+    } else {
+      console.warn(
+        'Background image cannot be successfully loaded. Background will fall back to white.'
+      );
+      drawWhiteBackground();
+    }
+  } else if (isValidHexColor(background)) {
+    ctx.fillStyle = background;
+    ctx.fillRect(0, 0, imageWidth, imageHeight);
+  } else {
+    drawWhiteBackground();
+  }
 }
 
 function drawTitleText(ctx: CanvasRenderingContext2D) {
@@ -213,37 +241,44 @@ async function drawProfileImageAndText(ctx: CanvasRenderingContext2D) {
   const profileImg = await loadImageByEnv(
     'https://secure.gravatar.com/avatar/fcbbe6a602b2ed048931956421f1f7f3'
   );
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(
-    profileImgX + profileImgSize / 2,
-    profileImgY + profileImgSize / 2,
-    profileImgSize / 2,
-    0,
-    Math.PI * 2,
-    true
-  );
-  ctx.closePath();
-  ctx.clip();
-  ctx.drawImage(
-    profileImg,
-    profileImgX,
-    profileImgY,
-    profileImgSize,
-    profileImgSize
-  );
-  ctx.restore();
+
+  if (profileImg) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(
+      profileImgX + profileImgSize / 2,
+      profileImgY + profileImgSize / 2,
+      profileImgSize / 2,
+      0,
+      Math.PI * 2,
+      true
+    );
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(
+      profileImg,
+      profileImgX,
+      profileImgY,
+      profileImgSize,
+      profileImgSize
+    );
+    ctx.restore();
+  }
 
   const marginLeft = 24;
   const lineHeight = fontSizeSmall * 1.5;
   const font = `600 ${fontSizeSmall}px Poppins`;
+  const textX = profileImg
+    ? profileImgX + profileImgSize + marginLeft
+    : profileImgX;
+  const textY = profileImgY + profileImgSize / 2 - lineHeight / 2;
 
   drawText({
     ctx,
     text: 'Kevin',
     font,
-    x: profileImgX + profileImgSize + marginLeft,
-    y: profileImgY + profileImgSize / 2 - lineHeight / 2,
+    x: textX,
+    y: textY,
     maxWidth: 500,
     maxHeight: lineHeight,
     lineHeight,
@@ -259,15 +294,23 @@ async function drawLogo(ctx: CanvasRenderingContext2D) {
     paddingLeft,
     logoWidth,
     logoHeight,
-    defaultLogo,
     logo,
   } = getConfig();
 
+  if (!logo) {
+    return;
+  }
+
+  const img = await loadImageByEnv(logo);
+
+  if (!img) {
+    return;
+  }
+
   const logoX = imageWidth - paddingLeft - logoWidth;
   const logoY = imageHeight - paddingTop - logoHeight;
-  const logoImg = await loadImageWithFallback(logo, defaultLogo);
 
-  ctx.drawImage(logoImg, logoX, logoY, logoWidth, logoHeight);
+  ctx.drawImage(img, logoX, logoY, logoWidth, logoHeight);
 }
 
 async function loadFont(
@@ -297,11 +340,8 @@ export async function buildCanvas(
 
   await loadFonts();
 
-  ctx.fillStyle = '#e9ecef';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
   await Promise.allSettled([
-    await drawBackgroundImage(ctx),
+    await drawBackground(ctx),
     await drawProfileImageAndText(ctx),
     drawTitleText(ctx),
     await drawLogo(ctx),

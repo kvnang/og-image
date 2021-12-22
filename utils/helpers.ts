@@ -11,3 +11,12 @@ export function getBaseUrl() {
     ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
     : 'http://localhost:3000';
 }
+
+export function isValidUrl(str: string) {
+  // Only accepts http:// and https://
+  return /^(http|https):\/\//.test(str);
+}
+
+export function isValidHexColor(str: string) {
+  return /^#?([a-f0-9]{6}|[a-f0-9]{3})$/.test(str);
+}

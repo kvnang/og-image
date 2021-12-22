@@ -52,6 +52,8 @@ const documentSetup = css`
     --box-shadow-2: 0 6px 9px -3px hsl(0deg 0% 0% / 0.32);
     --color-focus: black 0px 0px 0px 2px;
     --transition: 0.25s ease;
+
+    --font-size-small: 0.8rem;
   }
 
   @media screen {
@@ -566,17 +568,31 @@ const formStyles = css`
     > label {
       display: flex;
       align-items: center;
+    }
 
-      .label {
-        margin-right: 1rem;
-        text-align: left;
-        font-weight: 600;
-      }
+    &__label {
+      margin-right: 1rem;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    &__input {
+      position: relative;
+      flex: 1;
 
       input,
       select {
-        flex: 1;
+        width: 100%;
       }
+    }
+
+    &__desc {
+      position: absolute;
+      top: 100%;
+      margin-top: 0.125rem;
+      width: 100%;
+      text-align: right;
+      font-size: var(--font-size-small);
     }
   }
 

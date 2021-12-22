@@ -68,10 +68,10 @@ export default function Home() {
   return (
     <ContainerStyles>
       <Head>
-        <title>Dynamic og:image Generator using Canvas API</title>
+        <title>Dynamic og:image Generator using Canvas</title>
         <meta
           name="description"
-          content="Lightning fast og:image on-the-fly generation using Canvas API"
+          content="Lightning fast, on-the-fly og:image generation using Canvas"
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -105,8 +105,16 @@ export default function Home() {
               <code style={{ color: 'var(--color-primary)' }}>og:image</code>
             </h1>
             <p>
-              Lightning fast <code>og:image</code> on-the-fly generation using
-              purely Canvas API. No Puppeteer needed!
+              Lightning fast, on-the-fly <code>og:image</code> generation using
+              server-side canvas powered by Google's{' '}
+              <a
+                href="https://skia.org/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Skia
+              </a>{' '}
+              graphics library. No Puppeteer needed!
             </p>
           </TitleStyles>
           <Canvas />
