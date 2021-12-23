@@ -31,6 +31,7 @@ const FooterStyles = styled.footer`
   border-top: 1px solid var(--color-footer-separator);
   justify-content: center;
   align-items: center;
+  text-align: center;
 `;
 
 const GitHubCornerStyles = styled.a`
@@ -49,15 +50,6 @@ const GitHubCornerStyles = styled.a`
 const TitleStyles = styled.section`
   margin-bottom: 5rem;
   width: 100%;
-
-  h1 {
-    font-size: 2rem;
-
-    span {
-      font-weight: 400;
-      font-style: italic;
-    }
-  }
 
   p {
     max-inline-size: var(--size-content-3);
@@ -101,12 +93,20 @@ export default function Home() {
         <MainStyles>
           <TitleStyles>
             <h1>
-              <code style={{ color: 'var(--gray-8)' }}>&lt;canvas&gt;</code>{' '}
-              <code style={{ color: 'var(--color-primary)' }}>og:image</code>
+              <span
+                style={{ display: 'block', fontSize: 'var(--font-size-4)' }}
+              >
+                Lightning fast, browserless
+              </span>
+              <span style={{ color: 'var(--color-primary)' }}>
+                {' '}
+                Social Cards Generator
+              </span>
             </h1>
             <p>
-              Lightning fast, on-the-fly <code>og:image</code> generation using
-              server-side canvas powered by Google's{' '}
+              Lightning fast, on-the-fly{' '}
+              <code className="inline">og:image</code> generation using{' '}
+              <s>Puppeteer</s> server-side canvas powered by Google's{' '}
               <a
                 href="https://skia.org/"
                 target="_blank"
@@ -114,23 +114,37 @@ export default function Home() {
               >
                 Skia
               </a>{' '}
-              graphics library. No Puppeteer needed!
+              graphics library.
             </p>
           </TitleStyles>
           <Canvas />
         </MainStyles>
 
         <FooterStyles>
-          <p>
-            By{' '}
-            <a
-              href="https://github.com/kvnang"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <strong>Kevin Ang</strong>
-            </a>
-          </p>
+          <div>
+            <p>
+              By{' '}
+              <a
+                href="https://github.com/kvnang"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <strong>Kevin Ang</strong>
+              </a>
+            </p>
+            <p>
+              <small>
+                Inspired by{' '}
+                <a
+                  href="https://github.com/vercel/og-image"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  vercel/og-image
+                </a>
+              </small>
+            </p>
+          </div>
         </FooterStyles>
       </WrapperStyles>
     </ContainerStyles>

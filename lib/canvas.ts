@@ -39,9 +39,11 @@ export function getConfig() {
     title:
       'This is a dynamically created image in a canvas element. Lorem ipsum dolor sit amet consectetur adipiscing elit et lorem ipsum dolorem.',
     meta: '29 January 2022',
-    background: '',
+    bg: '',
     logo: '',
     color: '#fff',
+    author: '',
+    authorImg: '',
   };
 
   return { ...config, ...passedConfig };
@@ -138,32 +140,21 @@ async function loadImageByEnv(src: string) {
   return img;
 }
 
-async function loadImageWithFallback(imageUrl: string, fallbackUrl: string) {
-  let img;
-  try {
-    img = await loadImageByEnv(imageUrl);
-  } catch (err) {
-    console.error(err);
-    img = await loadImageByEnv(fallbackUrl);
-  }
-  return img;
-}
-
 async function drawBackground(ctx: CanvasRenderingContext2D) {
-  const { imageWidth, imageHeight, background } = getConfig();
+  const { imageWidth, imageHeight, bg } = getConfig();
 
   function drawWhiteBackground() {
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, imageWidth, imageHeight);
   }
 
-  if (!background) {
+  if (!bg) {
     drawWhiteBackground();
     return;
   }
 
-  if (isValidUrl(background)) {
-    const img = await loadImageByEnv(background);
+  if (isValidUrl(bg)) {
+    const img = await loadImageByEnv(bg);
 
     if (img) {
       ctx.save();
@@ -181,8 +172,8 @@ async function drawBackground(ctx: CanvasRenderingContext2D) {
       );
       drawWhiteBackground();
     }
-  } else if (isValidHexColor(background)) {
-    ctx.fillStyle = background;
+  } else if (isValidHexColor(bg)) {
+    ctx.fillStyle = bg;
     ctx.fillRect(0, 0, imageWidth, imageHeight);
   } else {
     drawWhiteBackground();
@@ -234,13 +225,14 @@ async function drawProfileImageAndText(ctx: CanvasRenderingContext2D) {
     paddingLeft,
     fontSizeSmall,
     profileImgSize,
+    author,
+    authorImg,
   } = getConfig();
+
+  const profileImg = await loadImageByEnv(authorImg);
 
   const profileImgX = paddingLeft;
   const profileImgY = imageHeight - paddingTop - profileImgSize;
-  const profileImg = await loadImageByEnv(
-    'https://secure.gravatar.com/avatar/fcbbe6a602b2ed048931956421f1f7f3'
-  );
 
   if (profileImg) {
     ctx.save();
@@ -265,25 +257,27 @@ async function drawProfileImageAndText(ctx: CanvasRenderingContext2D) {
     ctx.restore();
   }
 
-  const marginLeft = 24;
-  const lineHeight = fontSizeSmall * 1.5;
-  const font = `600 ${fontSizeSmall}px Poppins`;
-  const textX = profileImg
-    ? profileImgX + profileImgSize + marginLeft
-    : profileImgX;
-  const textY = profileImgY + profileImgSize / 2 - lineHeight / 2;
+  if (author) {
+    const marginLeft = 24;
+    const lineHeight = fontSizeSmall * 1.5;
+    const font = `600 ${fontSizeSmall}px Poppins`;
+    const textX = profileImg
+      ? profileImgX + profileImgSize + marginLeft
+      : profileImgX;
+    const textY = profileImgY + profileImgSize / 2 - lineHeight / 2;
 
-  drawText({
-    ctx,
-    text: 'Kevin',
-    font,
-    x: textX,
-    y: textY,
-    maxWidth: 500,
-    maxHeight: lineHeight,
-    lineHeight,
-    type: 'name',
-  });
+    drawText({
+      ctx,
+      text: author,
+      font,
+      x: textX,
+      y: textY,
+      maxWidth: 500,
+      maxHeight: lineHeight,
+      lineHeight,
+      type: 'name',
+    });
+  }
 }
 
 async function drawLogo(ctx: CanvasRenderingContext2D) {

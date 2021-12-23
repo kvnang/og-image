@@ -10,8 +10,8 @@ import { breakpoints } from './breakpoints';
 
 const documentSetup = css`
   :root {
-    --font-sans: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell,
-      Noto Sans, sans-serif;
+    --font-sans: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu,
+      Cantarell, Noto Sans, sans-serif;
     --font-serif: ui-serif, serif;
     --font-mono: Ubuntu Mono, Dank Mono, Operator Mono, Inconsolata, Fira Mono,
       ui-monospace, SF Mono, Monaco, Droid Sans Mono, Source Code Pro, monospace;
@@ -36,6 +36,17 @@ const documentSetup = css`
     --radius-5: 4rem;
     --radius-6: 8rem;
 
+    --font-size-00: 0.5rem;
+    --font-size-0: 0.75rem;
+    --font-size-1: 1rem;
+    --font-size-2: 1.1rem;
+    --font-size-3: 1.25rem;
+    --font-size-4: 1.5rem;
+    --font-size-5: 2rem;
+    --font-size-6: 2.5rem;
+    --font-size-7: 3rem;
+    --font-size-8: 3.5rem;
+
     --size-content-1: 20ch;
     --size-content-2: 45ch;
     --size-content-3: 60ch;
@@ -44,6 +55,7 @@ const documentSetup = css`
     --color-primary: #5c7cfa;
     --color-primary-tint: #bac8ff;
     --color-primary-shade: #3b5bdb;
+    --color-success: #12b886;
     --color-bg: var(--gray-0);
     --color-input-bg: var(--gray-1);
     --color-input-border: var(--gray-5);
@@ -203,6 +215,14 @@ const typographyStyles = css`
 
   code {
     font-family: var(--font-mono);
+
+    &.inline {
+      background-color: var(--gray-3);
+      padding: 0.125rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 90%;
+      line-height: 1.5rem;
+    }
   }
 
   .image-wrapper {
@@ -273,25 +293,8 @@ const typographyStyles = css`
 
   h1,
   .h1 {
-    font-size: 1.5rem;
+    font-size: var(--font-size-7);
     font-weight: 700;
-    letter-spacing: 0.015em;
-
-    @media ${breakpoints.tabletS} {
-      font-size: 1.75rem;
-    }
-
-    @media ${breakpoints.laptopS} {
-      font-size: 2.25rem;
-    }
-    /* 
-    @media ${breakpoints.laptopL} {
-      font-size: 2.25rem;
-    } */
-
-    @media ${breakpoints.desktopS} {
-      font-size: 2.5rem;
-    }
 
     &:not(:last-child) {
       margin-bottom: 0.625em;

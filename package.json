@@ -22,7 +22,6 @@
   "devDependencies": {
     "@types/node": "16.11.12",
     "@types/react": "17.0.37",
-    "@types/sharp": "^0.29.4",
     "@types/skia-canvas": "^0.9.2",
     "@types/styled-components": "^5.1.18",
     "eslint": "8.4.1",

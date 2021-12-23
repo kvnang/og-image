@@ -22,8 +22,8 @@ const ContainerStyles = styled.section`
       max-width: 100%;
 
       @media ${breakpoints.laptopS} {
-        flex: 0 0 40%;
-        max-width: 40%;
+        flex: 0 0 45%;
+        max-width: 45%;
       }
     }
 
@@ -32,15 +32,15 @@ const ContainerStyles = styled.section`
       max-width: 100%;
 
       @media ${breakpoints.laptopS} {
-        flex: 0 0 60%;
-        max-width: 60%;
+        flex: 0 0 55%;
+        max-width: 55%;
       }
     }
   }
 
   .inputs {
     .form-field__label {
-      width: 9ch;
+      width: 11ch;
     }
   }
 
@@ -88,6 +88,12 @@ const ContainerStyles = styled.section`
     .copy-link-wrapper {
       margin-top: 2rem;
       text-align: center;
+
+      p {
+        margin-top: 0.5rem;
+        transition: opacity var(--transition);
+        color: var(--color-success);
+      }
     }
   }
 `;
@@ -96,33 +102,54 @@ const baseUrl = getBaseUrl();
 
 const defaultValues = {
   logo: `${baseUrl}/sample-logo.png`,
-  background: `${baseUrl}/sample-background.jpg`,
+  bg: `${baseUrl}/sample-background.jpg`,
   title:
     'This is a dynamically created image in a canvas element. Lorem ipsum dolor sit amet consectetur adipiscing elit et lorem ipsum dolorem.',
   meta: '22 January 2022',
   color: '#ffffff',
+  author: 'Kevin',
+  authorImg: 'https://avatars.githubusercontent.com/u/51168758?s=80&v=4',
 };
 
 export default function Canvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const inputTitleRef = useRef<HTMLInputElement>(null);
   const inputMetaRef = useRef<HTMLInputElement>(null);
-  const inputBackgroundRef = useRef<HTMLInputElement>(null);
+  const inputBgRef = useRef<HTMLInputElement>(null);
   const inputLogoRef = useRef<HTMLInputElement>(null);
   const inputColorRef = useRef<HTMLInputElement>(null);
+  const inputAuthorRef = useRef<HTMLInputElement>(null);
+  const inputAuthorImgRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState<string | undefined>(defaultValues.title);
   const [meta, setMeta] = useState<string | undefined>(defaultValues.meta);
   const [color, setColor] = useState<string | undefined>(defaultValues.color);
-  const [background, setBackground] = useState<string | undefined>(
-    defaultValues.background
-  );
+  const [bg, setBg] = useState<string | undefined>(defaultValues.bg);
   const [logo, setLogo] = useState<string | undefined>(defaultValues.logo);
+  const [author, setAuthor] = useState<string | undefined>(
+    defaultValues.author
+  );
+  const [authorImg, setAuthorImg] = useState<string | undefined>(
+    defaultValues.authorImg
+  );
 
   const [loading, setLoading] = useState<boolean>(false);
   const [canvasOverlay, setCanvasOverlay] = useState<string | undefined>(
     undefined
   );
+  const [copied, _setCopied] = useState<boolean>(false);
+
+  let timeout: ReturnType<typeof setTimeout>;
+  const setCopiedTimeout = () => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => _setCopied(false), 2000);
+  };
+  const setCopied = (value: boolean) => {
+    _setCopied(value);
+    if (value) {
+      setCopiedTimeout();
+    }
+  };
 
   const { imageWidth, imageHeight } = getConfig();
 
@@ -165,19 +192,20 @@ export default function Canvas() {
     }
 
     setLoading(true);
-    maybeUpdateCanvas({ title, meta, background, logo, color });
-  }, [title, meta, background, logo, color]);
+    maybeUpdateCanvas({ title, meta, bg, logo, color, author, authorImg });
+  }, [title, meta, bg, logo, color, author, authorImg]);
 
   const getLinkParams = () => {
     const params = {
       title,
       meta,
-      background,
+      bg,
       logo,
       color,
+      author,
+      authorImg,
     };
 
-    // remove null, undefined, empty string values
     const cleanParams = cleanObject(params) as Record<string, string>;
 
     const urlParams = new URLSearchParams(cleanParams).toString();
@@ -260,15 +288,50 @@ export default function Canvas() {
                         id="background"
                         name="background"
                         placeholder="https://www.example.com/image.jpg"
-                        ref={inputBackgroundRef}
-                        onChange={() =>
-                          setBackground(inputBackgroundRef.current?.value)
-                        }
-                        defaultValue={defaultValues.background}
+                        ref={inputBgRef}
+                        onChange={() => setBg(inputBgRef.current?.value)}
+                        defaultValue={defaultValues.bg}
                       />
                       <p className="form-field__desc">
                         Accepts URL or Hex color
                       </p>
+                    </div>
+                  </label>
+                </div>
+
+                <div className="form-field">
+                  <label htmlFor="authorImg">
+                    <span className="form-field__label">Author Image</span>
+                    <div className="form-field__input">
+                      <input
+                        type="url"
+                        id="authorImg"
+                        name="authorImg"
+                        placeholder="https://www.example.com/image.jpg"
+                        ref={inputAuthorImgRef}
+                        onChange={() =>
+                          setAuthorImg(inputAuthorImgRef.current?.value)
+                        }
+                        defaultValue={defaultValues.authorImg}
+                      />
+                    </div>
+                  </label>
+                </div>
+                <div className="form-field">
+                  <label htmlFor="author">
+                    <span className="form-field__label">Author</span>
+                    <div className="form-field__input">
+                      <input
+                        type="url"
+                        id="author"
+                        name="author"
+                        placeholder="https://www.example.com/image.jpg"
+                        ref={inputAuthorRef}
+                        onChange={() =>
+                          setAuthor(inputAuthorRef.current?.value)
+                        }
+                        defaultValue={defaultValues.author}
+                      />
                     </div>
                   </label>
                 </div>
@@ -310,10 +373,16 @@ export default function Canvas() {
             <button
               type="button"
               className="button"
-              onClick={() => navigator.clipboard.writeText(getLink())}
+              onClick={() => {
+                navigator.clipboard.writeText(getLink());
+                setCopied(true);
+              }}
             >
               Copy Link
             </button>
+            <p style={{ opacity: copied ? 1 : 0 }}>
+              <small>Link Copied!</small>
+            </p>
           </div>
         </div>
       </div>
