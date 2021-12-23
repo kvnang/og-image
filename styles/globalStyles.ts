@@ -606,6 +606,7 @@ const formStyles = css`
     padding: 0.5rem 1rem;
     border-radius: var(--radius-2);
     border: 1px solid var(--color-input-border);
+    line-height: 1.5;
   }
 `;
 

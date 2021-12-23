@@ -89,6 +89,24 @@ const ContainerStyles = styled.section`
       margin-top: 2rem;
       text-align: center;
 
+      .copy-link-input {
+        display: flex;
+
+        input {
+          border-top-right-radius: 0;
+          border-bottom-right-radius: 0;
+          border-right: 0;
+          color: var(--gray-6);
+        }
+
+        button {
+          white-space: nowrap;
+          border-top-left-radius: 0;
+          border-bottom-left-radius: 0;
+          border-left: 0;
+        }
+      }
+
       p {
         margin-top: 0.5rem;
         transition: opacity var(--transition);
@@ -370,16 +388,25 @@ export default function Canvas() {
             </div>
           </a>
           <div className="copy-link-wrapper">
-            <button
-              type="button"
-              className="button"
-              onClick={() => {
-                navigator.clipboard.writeText(getLink());
-                setCopied(true);
-              }}
-            >
-              Copy Link
-            </button>
+            <div className="copy-link-input">
+              <input
+                type="text"
+                disabled
+                value={getLink()}
+                style={{ width: '100%' }}
+              />
+              <button
+                type="button"
+                className="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(getLink());
+                  setCopied(true);
+                }}
+              >
+                Copy Link
+              </button>
+            </div>
+
             <p style={{ opacity: copied ? 1 : 0 }}>
               <small>Link Copied!</small>
             </p>
