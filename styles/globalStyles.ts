@@ -129,7 +129,7 @@ const documentSetup = css`
     margin: 0;
   }
 
-  @media (hover: hover) {
+  /* @media (hover: hover) {
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -148,7 +148,7 @@ const documentSetup = css`
         background-color: var(--color-accent);
       }
     }
-  }
+  } */
 
   img,
   figure {
